@@ -22,23 +22,28 @@ public class Task2 {
     int countDigit = 0;
     int countSpecialSymbols = 0;
 
+    Map<Character, Integer> groupOfChar = new HashMap<>();
     for (int i = 0; i < length; i++) {
       char c = inputPassword.charAt(i);
 
-      countUpperCase += checkUpperCase(c) ? 1 : 0;
-      countLowerCase += checkLowerCase(c) ? 1 : 0;
-      countDigit += checkDigit(c) ? 1 : 0;
-      countSpecialSymbols += checkSpecialSymbols(c) ? 1 : 0;
+      Integer count = groupOfChar.get(c);
+      if (count != null) {
+        count += 1;
+        groupOfChar.put(c, count);
+      } else {
+        groupOfChar.put(c, 1);
+      }
+
+      countUpperCase |= checkUpperCase(c);
+      countLowerCase |= checkLowerCase(c);
+      countDigit |= checkDigit(c);
+      countSpecialSymbols |= checkSpecialSymbols(c);
     }
 
-    int counterValidation =
-        (countUpperCase > 0 ? 1 : 0)
-            + ((countLowerCase > 0) ? 1 : 0)
-            + (countDigit > 0 ? 1 : 0)
-            + (countSpecialSymbols > 0 ? 1 : 0);
-
-    boolean isRepeatedCharacterExist = checkRepeatCharacters(inputPassword);
-    boolean isStrongPassword = counterValidation == 4 && !isRepeatedCharacterExist;
+    int counterValidation = countUpperCase + countLowerCase + countDigit + countSpecialSymbols;
+    boolean isNoRepeatedCharacter =
+        groupOfChar.entrySet().stream().anyMatch(entrySet -> entrySet.getValue() < 6);
+    boolean isStrongPassword = counterValidation == 4 && isNoRepeatedCharacter;
 
     if (isStrongPassword) {
       System.out.println("strong");
@@ -56,8 +61,8 @@ public class Task2 {
    * @param c
    * @return true if it is uppercase otherwise false
    */
-  private static boolean checkUpperCase(char c) {
-    return c >= 'A' && c <= 'Z';
+  private static int checkUpperCase(char c) {
+    return c >= 'A' && c <= 'Z' ? 1 : 0;
   }
 
   /**
@@ -66,8 +71,8 @@ public class Task2 {
    * @param c
    * @return
    */
-  private static boolean checkLowerCase(char c) {
-    return c > 'a' && c < 'z';
+  private static int checkLowerCase(char c) {
+    return c >= 'a' && c <= 'z' ? 1 : 0;
   }
 
   /**
@@ -76,8 +81,8 @@ public class Task2 {
    * @param c
    * @return
    */
-  private static boolean checkDigit(char c) {
-    return c > '0' && c < '9';
+  private static int checkDigit(char c) {
+    return c >= '0' && c <= '9' ? 1 : 0;
   }
 
   /**
@@ -86,23 +91,7 @@ public class Task2 {
    * @param c
    * @return
    */
-  private static boolean checkSpecialSymbols(char c) {
-    return !checkUpperCase(c) && !checkLowerCase(c) && !checkDigit(c);
-  }
-
-  private static boolean checkRepeatCharacters(String input) {
-    Map<Character, Integer> groupOfChar = new HashMap<Character, Integer>();
-
-    for (int i = 0; i < input.length(); i++) {
-      Integer count = groupOfChar.get(input.charAt(i));
-      if (count != null) {
-        count += 1;
-        groupOfChar.put(input.charAt(i), count);
-      } else {
-        groupOfChar.put(input.charAt(i), 1);
-      }
-    }
-
-    return groupOfChar.entrySet().stream().anyMatch(entrySet -> entrySet.getValue() > 5);
+  private static int checkSpecialSymbols(char c) {
+    return checkUpperCase(c) == 0 && checkLowerCase(c) == 0 && checkDigit(c) == 0 ? 1 : 0;
   }
 }
